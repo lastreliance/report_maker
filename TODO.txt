@@ -1,0 +1,2 @@
+"reportlab" module
+https://realpython.com/creating-modifying-pdf/#creating-a-pdf-file-from-scratch
