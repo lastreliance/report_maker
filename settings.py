@@ -1,2 +1,1 @@
-class Setting:
-    def __init__(self):
+geometry = "800x600+300+200"
