@@ -17,3 +17,9 @@ class Container:
     def hide(self):
         for widget in self.widgets:
             widget.place_info()
+
+
+class WindowContainer(Container):
+    def __init__(self):
+        self.windows: List[tk.TopLevel] = list()
+        
