@@ -1,9 +1,10 @@
 # Создатель отчётов
 ### Эта программа предназначена для создания ".pdf" файлов из набора картинок.
 
+### Дла начала работы запустите run.exe
+
+### Проект создан на Python 3.7 с библиотекой "reportlab" и модулем "tkinter"
 
 
-
-
-
-###### credits: @chingiz.khabalov, @elydlch
+###### Права не защищены, репозиторий открыт https://github.com/lastreliance/report_maker
+###### credits: https://vk.com/chingiz.khabalov, https://vk.com/elydlch
