@@ -1,11 +1,11 @@
 import tkinter as tk
-from typing import List
+from typing import List, Tuple, Iterable
 
 
 class Container:
     def __init__(self):
         self.widgets: List[tk.Widget] = list()
-        self.places: List[tuple] = list()
+        self.places: List[Tuple[int, int]] = list()
 
     def destroy(self):
         for widget in self.widgets[::-1]:
@@ -15,15 +15,21 @@ class Container:
     def add(self, widget: tk.Widget):
         self.widgets.append(widget)
         info = widget.place_info()
-        self.places.append((int(info['x']), int(info['y'])))
+        # self.places.append((int(info['x']), int(info['y'])))
+
+    def expand(self, *widgets: tk.Widget):
+        for widget in widgets:
+            self.add(widget)
 
     def hide(self):
         for i in range(len(self.widgets)):
-            self.places[i] = self.widgets[i].place_info()
+            self.places[i] = Container.get_position(self.widgets[i])
             self.widgets[i].place_forget()
 
-    def show(self):
-
+    @staticmethod
+    def get_position(widget: tk.Widget) -> Tuple[int, int]:
+        data = widget.place_info()
+        return int(data.get("x")), int(data.get("y"))
 
 
 class WindowContainer:
