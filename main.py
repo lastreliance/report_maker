@@ -3,6 +3,7 @@ import settings
 
 from container import Container
 from tkinter import filedialog
+from tkinter import messagebox
 from PIL import ImageTk, Image
 from typing import List
 from reportlab.pdfgen.canvas import Canvas
@@ -34,11 +35,16 @@ class App:
         self.window.mainloop()
 
     def add_image_with_dialog(self):
+        if len(self.images) >= settings.max_images_count:
+            messagebox.showerror("Error", "Достигнуто максимальное количество картинок.")
+            return
         path: str = filedialog.askopenfilename(filetypes=(settings.image_types,))
         self.add_image(path)
 
     def add_image(self, image: str):
         self.images.append(image)
+        a = Image.Image()
+        a.thumbnail(maxsize, PIL.Image.ANTIALIAS)
 
 
 
