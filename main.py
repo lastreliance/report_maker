@@ -1,13 +1,17 @@
 import tkinter as tk
 import settings
 
-from container import Container
+
+from typing import List
+
 from tkinter import filedialog
 from tkinter import messagebox
+
 from PIL import ImageTk, Image
-from typing import List
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
 
+from container import Container
 
 
 class App:
@@ -43,9 +47,6 @@ class App:
 
     def add_image(self, image: str):
         self.images.append(image)
-        a = Image.Image()
-        a.thumbnail(maxsize, PIL.Image.ANTIALIAS)
-
 
 
 def main():
