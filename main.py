@@ -1,4 +1,6 @@
 import tkinter as tk
+import traceback
+
 import settings
 
 
@@ -45,13 +47,22 @@ class App:
         path: str = filedialog.askopenfilename(filetypes=(settings.image_types,))
         self.add_image(path)
 
-    def add_image(self, image: str):
-        self.images.append(image)
+    def add_image(self, path: str):
+        self.images.append(path)
+        image = Image.open(path)
+        image.thumbnail(settings.image_show_size, 1)
+
 
 
 def main():
-    app = App()
-    app.start()
+    try:
+        app = App()
+        app.start()
+    except Exception as exc:
+        if exc:
+            pass
+        with open('log.txt', 'w') as file:
+            file.write(traceback.format_exc())
 
 
 if __name__ == "__main__":
