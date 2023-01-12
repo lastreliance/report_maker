@@ -165,7 +165,7 @@ class App:
         for path in self.images:
             image = Image.open(path)
             image.thumbnail(A4)
-            # image = image.convert(mode='RGB')
+            image = image.convert(mode='RGB')
             filepath = os.getcwd() + '\\image.jpg'
             image.save(filepath)
 
