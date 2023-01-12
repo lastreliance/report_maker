@@ -18,19 +18,22 @@ from container import Container
 
 
 class App:
+    loaded_images: List[ImageTk.PhotoImage] = list()
+
     # noinspection PyTypeChecker
     def __init__(self):
         self.window = tk.Tk()
-        self.window.title("Report Maker")
-        self.window.config(background="blue")
         self.window.geometry(settings.geometry)
+        self.window.update_idletasks()
         self.images: List[str] = list()
         self.container = Container()
         self.image_field: tk.Text = None
 
     def init_ui(self):
+        self.container.destroy()
         frame = tk.Frame(self.window)
         self.image_field = tk.Text(frame, bg="green", fg="black", state="disabled", **settings.main_frame_size)
+        self.image_field.pack(side="left")
         frame.place(x=38, y=38)
 
         select_image = tk.Button(text="Добавить картинку",
@@ -40,7 +43,7 @@ class App:
         select_image.place(x=540, y=38)
 
         add_folder = tk.Button(text="Выбрать папку",
-                               command=self.add_folder,
+                               command=self.select_folder,
                                width=settings.button_width,
                                height=2)
         add_folder.place(x=540, y=110)
@@ -60,7 +63,8 @@ class App:
         delete_all = tk.Button(text="Начать",
                                command=self.image_process,
                                width=settings.button_width,
-                               height=4)
+                               height=4,
+                               font=("Calibri", 12))
         delete_all.place(x=540, y=473)
 
         self.container.expand(select_image, add_folder, delete_image, delete_all, frame, self.image_field)
@@ -68,6 +72,29 @@ class App:
     def start(self):
         self.init_ui()
         self.window.mainloop()
+
+    def update_image_field(self):
+        self.window.config(cursor='wait')
+        self.image_field.config(state='normal')
+        self.image_field.delete('1.0', 'end')
+
+        for path in self.images:
+            self.image_field.insert('end', ' ')
+
+            image = Image.open(path)
+            blank = Image.open("images/blank_A4.jpg")
+            image.thumbnail(settings.image_show_size, 1)
+            blank.paste(image)
+            App.loaded_images.append(ImageTk.PhotoImage(blank))
+            self.image_field.image_create('end', image=App.loaded_images[-1])
+
+            self.image_field.insert('end', '\n\n')
+
+        self.image_field.update_idletasks()
+        self.image_field.update()
+        self.image_field.see('end')
+        self.image_field.config(state='disabled')
+        self.window.config(cursor='')
 
     def add_image_with_dialog(self):
         if len(self.images) >= settings.max_images_count:
@@ -78,8 +105,7 @@ class App:
 
     def add_image(self, path: str):
         self.images.append(path)
-        image = Image.open(path)
-        image.thumbnail(settings.image_show_size, 1)
+        self.update_image_field()
 
     def select_folder(self):
         path: str = filedialog.askdirectory()
@@ -95,6 +121,19 @@ class App:
             return
         for image in images:
             self.add_image(image)
+
+    def delete_image(self):
+        self.images.pop()
+        App.loaded_images.pop()
+        self.update_image_field()
+
+    def delete_all(self):
+        self.images.clear()
+        App.loaded_images.clear()
+        self.update_image_field()
+
+    def image_process(self):
+        pass
 
 
 def main():
