@@ -13,6 +13,7 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.units import cm
 
 from container import Container
 
@@ -78,20 +79,11 @@ class App:
         self.image_field.config(state='normal')
         self.image_field.delete('1.0', 'end')
 
-        for path in self.images:
+        for image in self.loaded_images:
             self.image_field.insert('end', ' ')
-
-            image = Image.open(path)
-            blank = Image.open("images/blank_A4.jpg")
-            image.thumbnail(settings.image_show_size, 1)
-            blank.paste(image)
-            App.loaded_images.append(ImageTk.PhotoImage(blank))
-            self.image_field.image_create('end', image=App.loaded_images[-1])
-
+            self.image_field.image_create('end', image=image)
             self.image_field.insert('end', '\n\n')
 
-        self.image_field.update_idletasks()
-        self.image_field.update()
         self.image_field.see('end')
         self.image_field.config(state='disabled')
         self.window.config(cursor='')
@@ -104,25 +96,42 @@ class App:
         self.add_image(path)
 
     def add_image(self, path: str):
+        if not path:
+            return
         self.images.append(path)
+
+        image = Image.open(path)
+        blank = Image.open("images/blank_A4.jpg")
+        image.thumbnail(settings.image_show_size, 1)
+        blank.paste(image)
+        App.loaded_images.append(ImageTk.PhotoImage(blank))
+
         self.update_image_field()
 
     def select_folder(self):
         path: str = filedialog.askdirectory()
+        if not path:
+            self.window.config(cursor='')
+            return
+        self.window.config(cursor='wait')
         images: List[str] = list()
         for obj in sorted(os.listdir(path)):
             filename = join(path, obj)
             if isfile(filename):
-                if any(obj.endswith(end) for end in settings.image_types):
+                if any(obj.endswith(end[1:]) for end in settings.image_formats):
                     images.append(filename)
 
         if len(images) >= settings.max_images_count:
             messagebox.showerror("Error", "Достигнуто максимальное количество картинок.")
+            self.window.config(cursor='')
             return
         for image in images:
             self.add_image(image)
+        self.window.config(cursor='')
 
     def delete_image(self):
+        if not self.images:
+            return
         self.images.pop()
         App.loaded_images.pop()
         self.update_image_field()
@@ -133,7 +142,39 @@ class App:
         self.update_image_field()
 
     def image_process(self):
-        pass
+        def get_pos(pic: Image.Image) -> List[int]:
+            if pic.size[1] < A4[1]:
+                return [0, 29.7 * cm - pic.size[1]]
+            return [21 * cm - pic.size[0], 0]
+
+        if not self.images:
+            messagebox.showerror("Error", "Выберите хотя бы одно изображение")
+            return
+        self.window.config(cursor='wait')
+        try:
+            path = filedialog.asksaveasfile(filetypes=[("PDF-document", ".pdf")],
+                                            confirmoverwrite=True,
+                                            initialfile="filename.pdf")
+        except PermissionError:
+            messagebox.showerror("Файл занят другой программой.")
+            return
+        if path is None:
+            return
+        canvas = Canvas(path.name, pagesize=A4)
+        image: Image.Image
+        for path in self.images:
+            image = Image.open(path)
+            image.thumbnail(A4)
+            # image = image.convert(mode='RGB')
+            filepath = os.getcwd() + '\\image.jpg'
+            image.save(filepath)
+
+            canvas.drawInlineImage(filepath, *get_pos(image))
+            canvas.showPage()
+            os.remove(filepath)
+
+        canvas.save()
+        self.window.config(cursor='')
 
 
 def main():
