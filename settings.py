@@ -6,5 +6,9 @@ image_types = ("images", " ".join(image_formats))
 #TODO: define
 image_show_size = (int(), int())
 
-select_image_button_place = {"x": 50, "y": 50}
-main_frame_place = {"x": 100, "y": 50}
+button_width = 24
+
+text_unit_width = 10
+text_unit_height = 20
+main_frame_size = {"width": 320 // text_unit_width,
+                   "height": 525 // text_unit_height}

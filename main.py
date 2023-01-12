@@ -1,10 +1,11 @@
 import tkinter as tk
 import traceback
+import os
 
 import settings
 
-
 from typing import List
+from os.path import join, isfile
 
 from tkinter import filedialog
 from tkinter import messagebox
@@ -21,20 +22,48 @@ class App:
     def __init__(self):
         self.window = tk.Tk()
         self.window.title("Report Maker")
+        self.window.config(background="blue")
         self.window.geometry(settings.geometry)
         self.images: List[str] = list()
         self.container = Container()
-        self.image_field: tk.Frame = None
-    
+        self.image_field: tk.Text = None
+
     def init_ui(self):
+        frame = tk.Frame(self.window)
+        self.image_field = tk.Text(frame, bg="green", fg="black", state="disabled", **settings.main_frame_size)
+        frame.place(x=38, y=38)
 
-        self.image_field = tk.Frame(self.window, background="grey")
-        self.image_field.place(**settings.main_frame_place)
+        select_image = tk.Button(text="Добавить картинку",
+                                 command=self.add_image_with_dialog,
+                                 width=settings.button_width,
+                                 height=2)
+        select_image.place(x=540, y=38)
 
-        select_image_button = tk.Button(text="Добавить картинку",
-                                        command=self.add_image_with_dialog)
-        select_image_button.place(**settings.select_image_button_place)
-        self.container.expand(select_image_button, self.image_field)
+        add_folder = tk.Button(text="Выбрать папку",
+                               command=self.add_folder,
+                               width=settings.button_width,
+                               height=2)
+        add_folder.place(x=540, y=110)
+
+        delete_image = tk.Button(text="Удалить картинку",
+                                 command=self.delete_image,
+                                 width=settings.button_width,
+                                 height=2)
+        delete_image.place(x=540, y=276)
+
+        delete_all = tk.Button(text="Удалить всё",
+                               command=self.delete_all,
+                               width=settings.button_width,
+                               height=2)
+        delete_all.place(x=540, y=348)
+
+        delete_all = tk.Button(text="Начать",
+                               command=self.image_process,
+                               width=settings.button_width,
+                               height=4)
+        delete_all.place(x=540, y=473)
+
+        self.container.expand(select_image, add_folder, delete_image, delete_all, frame, self.image_field)
 
     def start(self):
         self.init_ui()
@@ -52,6 +81,20 @@ class App:
         image = Image.open(path)
         image.thumbnail(settings.image_show_size, 1)
 
+    def select_folder(self):
+        path: str = filedialog.askdirectory()
+        images: List[str] = list()
+        for obj in sorted(os.listdir(path)):
+            filename = join(path, obj)
+            if isfile(filename):
+                if any(obj.endswith(end) for end in settings.image_types):
+                    images.append(filename)
+
+        if len(images) >= settings.max_images_count:
+            messagebox.showerror("Error", "Достигнуто максимальное количество картинок.")
+            return
+        for image in images:
+            self.add_image(image)
 
 
 def main():
