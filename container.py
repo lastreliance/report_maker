@@ -1,5 +1,5 @@
 import tkinter as tk
-from typing import List, Tuple, Iterable
+from typing import List, Tuple, Iterable, Optional, Union
 
 
 class Container:
@@ -16,6 +16,21 @@ class Container:
         self.widgets.append(widget)
         info = widget.place_info()
         # self.places.append((int(info['x']), int(info['y'])))
+
+    def disable(self, exceptions: Optional[List[tk.Widget]] = None):
+        self._set_state("disabled", exceptions)
+
+    def _set_state(self, state: str, exceptions: Optional[List[tk.Widget]] = None):
+        type_exc = [tk.Frame, tk.Scrollbar]
+        if exceptions is None:
+            exceptions = list()
+        for widget in self.widgets:
+            if widget not in exceptions:
+                if type(widget) not in type_exc:
+                    widget['state'] = state
+
+    def enable(self, exceptions: Optional[List[tk.Widget]] = None):
+        self._set_state("normal", exceptions)
 
     def expand(self, *widgets: tk.Widget):
         for widget in widgets:
